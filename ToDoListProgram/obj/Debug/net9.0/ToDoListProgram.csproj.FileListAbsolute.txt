@@ -77,3 +77,4 @@ C:\Users\Administrator\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\
 C:\Users\Administrator\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\ToDoListProgram.pdb
 C:\Users\Administrator\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\ToDoListProgram.genruntimeconfig.cache
 C:\Users\Administrator\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\ref\ToDoListProgram.dll
+C:\Users\Administrator\Documents\GitHub\DotNET\ToDoListProgram\bin\Debug\net9.0\Data\tasks.json
