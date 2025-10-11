@@ -2,6 +2,8 @@ using ToDoListProgram.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddSingleton<ToDoListProgram.Data.TodoService>();
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

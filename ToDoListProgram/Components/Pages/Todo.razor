@@ -1,0 +1,64 @@
+@page "/todo"
+@inject ToDoListProgram.Data.TodoService TodoService
+
+<h3>To-Do List</h3>
+
+<div class="mb-3">
+    <input @bind="newTaskTitle" placeholder="Add new task..." class="form-control" />
+    <button class="btn btn-primary mt-2" @onclick="AddTask">Add</button>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Done</th>
+            <th>Task</th>
+            <th>Category</th>
+            <th>Priority</th>
+            <th>Due Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var task in TodoService.GetAll())
+        {
+            <tr class="@GetRowClass(task)">
+                <td>
+                    <input type="checkbox" @bind="task.IsCompleted" @bind:after="() => Save(task)" />
+                </td>
+                <td>@task.Title</td>
+                <td>@task.Category</td>
+                <td>@task.Priority</td>
+                <td>@(task.DueDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                <td>
+                    <button class="btn btn-sm btn-danger" @onclick="() => Delete(task.Id)">🗑</button>
+                </td>
+            </tr>
+
+        }
+    </tbody>
+</table>
+
+@code {
+    private string? newTaskTitle;
+
+    void AddTask()
+    {
+        if (!string.IsNullOrWhiteSpace(newTaskTitle))
+        {
+            TodoService.Add(new Data.TodoItem { Title = newTaskTitle });
+            newTaskTitle = string.Empty;
+        }
+    }
+
+    void Delete(int id) => TodoService.Delete(id);
+
+    void Save(Data.TodoItem item) => TodoService.Update(item);
+
+    string GetRowClass(Data.TodoItem task)
+    {
+        if (task.IsCompleted) return "table-success";
+        if (task.DueDate.HasValue && task.DueDate.Value < DateTime.Today) return "table-danger";
+        return "";
+    }
+}
