@@ -1,7 +1,32 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@inject ToDoListProgram.Service.UserService UserService
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div>
+    @if (UserService.IsLoggedIn())
+    {
+        <h2>Hello, @UserService.GetCurrentUser()?.Username!</h2>
+        <h3>Start managing your to-do list now!</h3>
+    }
+    else
+    {
+        <h2>Welcome to your To-Do App!</h2>
+    }
+</div>
 
-Welcome to your new app.
+@code{
+    private Func<Task>? onChangeHandler;
+
+    protected override void OnInitialized()
+    {
+        onChangeHandler = () => InvokeAsync(StateHasChanged);
+        UserService.OnChange += onChangeHandler; // state has changed
+    }
+
+    public void Dispose()
+    {
+        if (onChangeHandler != null) UserService.OnChange -= onChangeHandler; // delete the changed state
+    }
+}
