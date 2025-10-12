@@ -103,3 +103,15 @@
         overflow-y: auto;
     }
 }
+
+.login-section{
+    position: absolute;
+    bottom:1.5rem;
+    left:1rem;
+}
+
+.user-info {
+    font-size: 0.95rem;
+    color: #d0d0d0;
+    margin-bottom: 0.4rem;
+}

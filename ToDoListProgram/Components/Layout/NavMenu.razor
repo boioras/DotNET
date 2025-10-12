@@ -1,4 +1,8 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@rendermode InteractiveServer
+@inject ToDoListProgram.Service.UserService UserService
+@inject NavigationManager Nav
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">ToDoListProgram</a>
     </div>
@@ -26,6 +30,24 @@
             </NavLink>
         </div>
 
+        <div class="login-section">
+            @if (UserService.IsLoggedIn())
+            {
+                <div class="user-info text-light mb-2">
+                    <strong>@UserService.GetCurrentUser()?.Username</strong>
+                </div>
+                <a class="nav-link text-light" href="" @onclick:preventDefault @onclick="HandleLogout">
+                    <span class="bi bi-box-arrow-right"></span> Logout
+                </a>
+            }
+            else
+            {
+                <NavLink class="nav-link text-light" href="login">
+                    <span class="bi bi-person-circle"></span> Login
+                </NavLink>
+            }
+        </div>
+      
         <div>
             <NavLink class="nav-link" href="todo">
                 <span class="oi oi-list-rich" aria-hidden="true"></span> To-Do List
@@ -33,4 +55,26 @@
         </div>
     </nav>
 </div>
+
+@code {
+    private Func<Task>? onChangeHandler;
+
+    protected override void OnInitialized()
+    {
+        onChangeHandler = () => InvokeAsync(StateHasChanged);
+        UserService.OnChange += onChangeHandler; // state has changed
+    }
+
+    private async Task HandleLogout()
+    {
+        UserService.Logout();
+        await Task.Delay(200);
+        Nav.NavigateTo("/login", forceLoad: true); //jump to login page
+    }
+
+    public void Dispose()
+    {
+        if (onChangeHandler != null) UserService.OnChange -= onChangeHandler; // delete the changed state
+    }
+}
 
