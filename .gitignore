@@ -1,0 +1,41 @@
+# =========================
+# Visual Studio / .NET / Blazor
+# =========================
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+bin/
+obj/
+Debug/
+Release/
+Generated\ Files/
+
+# VS and VSCode settings
+.vs/
+.vscode/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+
+# Others
+*.log
+*.vsidx
+*.dbmdl
+*.bak
+*.tmp
+*.cache
+*.FileListAbsolute.txt
+*.csproj.user
+
+# Publish output
+publish/
+wwwroot/dist/
