@@ -1,0 +1,145 @@
+@page "/todo"
+@inject ToDoListProgram.Data.TodoService TodoService
+@implements IDisposable
+
+<h3 class="mb-3">To-Do List</h3>
+
+<!-- Task Form -->
+<div class="card p-3 mb-4 shadow-sm">
+    <div class="row g-2 align-items-center">
+        <div class="col-md-4">
+            <input @bind="newTaskTitle" placeholder="Task title..." class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <select @bind="newTaskCategory" class="form-select">
+                <option>Work</option>
+                <option>Study</option>
+                <option>Personal</option>
+                <option>Custom</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <select @bind="newTaskPriority" class="form-select">
+                <option value="H">High</option>
+                <option value="M">Medium</option>
+                <option value="L">Low</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <InputDate @bind-Value="newTaskDueDate" class="form-control" />
+        </div>
+
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100" @onclick="AddTask">Add Task</button>
+        </div>
+    </div>
+</div>
+
+<!-- Task Table -->
+<table class="table table-striped align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Done</th>
+            <th>Task</th>
+            <th>Category</th>
+            <th>Priority</th>
+            <th>Due Date</th>
+            <th style="width: 80px;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var task in TodoService.GetAll())
+        {
+            <tr class="@GetRowClass(task)">
+                <td>
+                    <input type="checkbox" @bind="task.IsCompleted" @bind:after="() => Save(task)" />
+                </td>
+                <td>@task.Title</td>
+                <td>@task.Category</td>
+                <td>
+                    <span class="badge @GetPriorityBadge(task.Priority)">@task.Priority</span>
+                </td>
+                <td>@(task.DueDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                <td>
+                    <button class="btn btn-sm btn-danger" title="Delete" @onclick="() => Delete(task.Id)">🗑</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="mb-3">
+    <div class="alert alert-secondary small">
+        <div><strong>Runtime JSON file:</strong> <code>@TodoService.FilePath</code></div>
+        <div><strong>Items in memory:</strong> @TodoService.GetAll().Count()</div>
+        <div><strong>Last saved (UTC):</strong> @(TodoService.LastSaved?.ToString("u") ?? "never")</div>
+        <div class="mt-2">
+            <button class="btn btn-sm btn-outline-secondary" @onclick="ReloadFromDisk">Reload from disk</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    void ReloadFromDisk() => TodoService.Reload();
+}
+
+@code {
+    private string? newTaskTitle;
+    private string newTaskCategory = "Work";
+    private string newTaskPriority = "M";
+    private DateTime? newTaskDueDate;
+
+    protected override void OnInitialized()
+    {
+        TodoService.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        TodoService.OnChange -= StateHasChanged;
+    }
+
+    private void AddTask()
+    {
+        if (string.IsNullOrWhiteSpace(newTaskTitle))
+            return;
+
+        var item = new ToDoListProgram.Data.TodoItem
+        {
+            Title = newTaskTitle,
+            Category = newTaskCategory,
+            Priority = newTaskPriority,
+            DueDate = newTaskDueDate
+        };
+
+        TodoService.Add(item);
+
+        newTaskTitle = string.Empty;
+        newTaskCategory = "Work";
+        newTaskPriority = "M";
+        newTaskDueDate = null;
+    }
+
+    private void Delete(int id) => TodoService.Delete(id);
+
+    private void Save(ToDoListProgram.Data.TodoItem item) => TodoService.Update(item);
+
+    private string GetRowClass(ToDoListProgram.Data.TodoItem task)
+    {
+        if (task.IsCompleted) return "table-success";
+        if (task.DueDate.HasValue && task.DueDate.Value.Date < DateTime.Today) return "table-danger";
+        return string.Empty;
+    }
+
+    private string GetPriorityBadge(string? p) =>
+        p switch
+        {
+            "H" => "bg-danger",
+            "M" => "bg-warning text-dark",
+            "L" => "bg-success",
+            _ => "bg-secondary"
+        };
+}

@@ -1,4 +1,4 @@
-﻿namespace ToDoListProgram.Data
+namespace ToDoListProgram.Data
 {
     public class TodoItem
     {
