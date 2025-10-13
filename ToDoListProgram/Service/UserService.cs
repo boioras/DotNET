@@ -16,13 +16,13 @@ namespace ToDoListProgram.Service
         }
 
         // register
-        public bool Register(string username, string password)
+        public bool Register(string? username, string? password)
         {
             username = username?.Trim();
             password = password?.Trim();
 
-            if (string.IsNullOrWhiteSpace(username) ||
-                string.IsNullOrWhiteSpace(password)) return false;
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+                return false;
 
             if (users.Any(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
                 return false;
@@ -30,17 +30,16 @@ namespace ToDoListProgram.Service
             users.Add(new User
             {
                 Id = nextUserId++,
-                Username = username,
-                Password = password,           // store exactly as typed (or hash later)
-                Role   = "User"
+                Username = username!,
+                Password = password!,
+                Role = "User"
             });
 
             NotifyStateChanged();
             return true;
         }
 
-        // login
-        public bool Login(string username, string password)
+        public bool Login(string? username, string? password)
         {
             username = username?.Trim();
             password = password?.Trim();

@@ -35,6 +35,7 @@ namespace ToDoListProgram.Data
                 item.Id = _tasks.Count > 0 ? _tasks.Max(t => t.Id) + 1 : 1;
 
             _tasks.Add(item);
+            Console.WriteLine($"[TodoService.Add] Task '{item.Title}' → UserId = {item.UserId}");
             Save();
         }
 
