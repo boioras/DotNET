@@ -26,6 +26,9 @@ namespace ToDoListProgram.Data
 
         public IEnumerable<TodoItem> GetAll() => _tasks;
 
+        public IEnumerable<TodoItem> GetForUser(int userId)
+            => _tasks.Where(t => t.UserId == userId).OrderBy(t => t.DueDate);
+
         public void Add(TodoItem item)
         {
             if (item.Id == 0)

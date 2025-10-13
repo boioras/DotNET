@@ -1,0 +1,166 @@
+@page "/tasks"
+@using ToDoListProgram.Data
+@using ToDoListProgram.Service
+@using Microsoft.AspNetCore.Components.Forms
+@inject TodoService TodoSvc
+@inject UserService UserSvc
+@inject NavigationManager Nav
+
+<PageTitle>My tasks</PageTitle>
+
+<h3>My Tasks</h3>
+
+@if (user == null)
+{
+    <div class="alert alert-warning">Please <a href="/login">log in</a> first.</div>
+}
+else
+{
+    <!-- ===== ADD / EDIT FORM ===== -->
+    <EditForm Model="@draft"
+              OnValidSubmit="SaveTask"
+              FormName="TaskEditForm"
+              data-enhance="false">
+        <DataAnnotationsValidator />
+        <div class="mb-2">
+            <label>Title</label>
+            <InputText @bind-Value="draft.Title" class="form-control" required />
+        </div>
+        <div class="mb-2">
+            <label>Category</label>
+            <InputText @bind-Value="draft.Category" class="form-control" />
+        </div>
+        <div class="mb-2">
+            <label>Priority</label>
+            <InputSelect @bind-Value="draft.Priority" class="form-select">
+                <option value="L">Low</option>
+                <option value="M">Medium</option>
+                <option value="H">High</option>
+            </InputSelect>
+        </div>
+        <div class="mb-2">
+            <label>Due date</label>
+            <InputDate @bind-Value="draft.DueDate" class="form-control" />
+        </div>
+        <button class="btn btn-primary" type="submit">@(_editId == 0 ? "Add" : "Update")</button>
+        @if (_editId != 0)
+        {
+            <button class="btn btn-secondary ms-2" @onclick="CancelEdit">Cancel</button>
+        }
+    </EditForm>
+
+    <!-- ===== TASK TABLE ===== -->
+    @if (!tasks.Any())
+    {
+        <p class="mt-3">No tasks yet.</p>
+    }
+    else
+    {
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Due</th>
+                    <th>Done</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in tasks)
+                {
+                    <tr>
+                        <td>@t.Title</td>
+                        <td>@t.Category</td>
+                        <td>@t.Priority</td>
+                        <td>@(t.DueDate?.ToString("d") ?? "-")</td>
+                        <td>
+                            <input type="checkbox" checked="@t.IsCompleted"
+                                   @onchange="e => ToggleDone(t)" />
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" @onclick="() => EditTask(t)">Edit</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteTask(t.Id)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    private User? user;
+    private List<TodoItem> tasks = new();
+    private TodoItem draft = EmptyDraft();
+    private int _editId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = UserSvc.GetCurrentUser();
+        if (user != null)
+        {
+            TodoSvc.OnChange += Refresh;
+            Refresh();
+        }
+    }
+
+    private void Refresh()
+    {
+        tasks = TodoSvc.GetForUser(user!.Id).ToList();
+        StateHasChanged();
+    }
+
+    private static TodoItem EmptyDraft() =>
+        new() { Priority = "M", Category = "General" };
+
+    private async Task SaveTask()
+    {
+        if (string.IsNullOrWhiteSpace(draft.Title)) return;
+
+        if (_editId == 0)        // add
+        {
+            draft.UserId = user!.Id;
+            TodoSvc.Add(draft);
+        }
+        else                       // update
+        {
+            draft.Id = _editId;
+            draft.UserId = user!.Id;
+            TodoSvc.Update(draft);
+        }
+
+        CancelEdit();
+    }
+
+    private void EditTask(TodoItem src)
+    {
+        _editId = src.Id;
+        draft = new TodoItem
+        {
+            Id = src.Id,
+            Title = src.Title,
+            Category = src.Category,
+            Priority = src.Priority,
+            DueDate = src.DueDate,
+            IsCompleted = src.IsCompleted
+        };
+    }
+
+    private void CancelEdit()
+    {
+        _editId = 0;
+        draft = EmptyDraft();
+    }
+
+    private void ToggleDone(TodoItem t)
+    {
+        t.IsCompleted = !t.IsCompleted;
+        TodoSvc.Update(t);
+    }
+
+    private void DeleteTask(int id) => TodoSvc.Delete(id);
+
+    public void Dispose() => TodoSvc.OnChange -= Refresh;
+}

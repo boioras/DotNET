@@ -4,13 +4,12 @@ using ToDoListProgram.Service;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSingleton<ToDoListProgram.Data.TodoService>();
+builder.Services.AddSingleton<ToDoListProgram.Service.UserService>();
+
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-
-builder.Services.AddSingleton<ToDoListProgram.Service.UserService>();
-builder.Services.AddSingleton<ToDoListProgram.Service.TodoItemService>();
 
 var app = builder.Build();
 

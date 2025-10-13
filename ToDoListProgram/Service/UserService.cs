@@ -15,32 +15,44 @@ namespace ToDoListProgram.Service
             users.Add(new User { Id = nextUserId++, Username = "admin", Password = "123", Role = "Admin" });
         }
 
-        // register a new user
+        // register
         public bool Register(string username, string password)
         {
-            if (users.Any(u => u.Username == username)) return false;
+            username = username?.Trim();
+            password = password?.Trim();
 
-            users.Add(
-                new User {
-                    Id = nextUserId++,
-                    Username = username,
-                    Password = password,
-                    Role = "User"
-                }
-            );
+            if (string.IsNullOrWhiteSpace(username) ||
+                string.IsNullOrWhiteSpace(password)) return false;
+
+            if (users.Any(u => u.Username.Equals(username, StringComparison.OrdinalIgnoreCase)))
+                return false;
+
+            users.Add(new User
+            {
+                Id = nextUserId++,
+                Username = username,
+                Password = password,           // store exactly as typed (or hash later)
+                Role   = "User"
+            });
 
             NotifyStateChanged();
             return true;
         }
 
-        //login
+        // login
         public bool Login(string username, string password)
         {
-            var user = users.FirstOrDefault(u => u.Username == username && u.Password == password);
+            username = username?.Trim();
+            password = password?.Trim();
+
+            var user = users.FirstOrDefault(u =>
+                u.Username.Equals(username, StringComparison.OrdinalIgnoreCase) &&
+                u.Password == password);
+
             if (user == null) return false;
 
             currentUser = user;
-            NotifyStateChanged(); // notify to refresh state
+            NotifyStateChanged();
             return true;
         }
 
