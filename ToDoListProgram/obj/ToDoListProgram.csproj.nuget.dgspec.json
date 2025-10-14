@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\or45r\\Documents\\GitHub\\DotNET\\ToDoListProgram\\ToDoListProgram.csproj": {}
+    "C:\\Users\\24544\\source\\repos\\boioras\\DotNET\\ToDoListProgram\\ToDoListProgram.csproj": {}
   },
   "projects": {
-    "C:\\Users\\or45r\\Documents\\GitHub\\DotNET\\ToDoListProgram\\ToDoListProgram.csproj": {
+    "C:\\Users\\24544\\source\\repos\\boioras\\DotNET\\ToDoListProgram\\ToDoListProgram.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\or45r\\Documents\\GitHub\\DotNET\\ToDoListProgram\\ToDoListProgram.csproj",
+        "projectUniqueName": "C:\\Users\\24544\\source\\repos\\boioras\\DotNET\\ToDoListProgram\\ToDoListProgram.csproj",
         "projectName": "ToDoListProgram",
-        "projectPath": "C:\\Users\\or45r\\Documents\\GitHub\\DotNET\\ToDoListProgram\\ToDoListProgram.csproj",
-        "packagesPath": "C:\\Users\\or45r\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\or45r\\Documents\\GitHub\\DotNET\\ToDoListProgram\\obj\\",
+        "projectPath": "C:\\Users\\24544\\source\\repos\\boioras\\DotNET\\ToDoListProgram\\ToDoListProgram.csproj",
+        "packagesPath": "C:\\Users\\24544\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\24544\\source\\repos\\boioras\\DotNET\\ToDoListProgram\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\or45r\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\24544\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,7 +26,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -69,7 +68,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.302/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

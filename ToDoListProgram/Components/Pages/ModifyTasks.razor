@@ -57,8 +57,21 @@ else
                 <tr>
                     <th>Title</th>
                     <th>Category</th>
-                    <th>Priority</th>
-                    <th>Due</th>
+                    <th @onclick="() => SortByPriority()" style="cursor: pointer;">
+                        Priority
+                        @if(sortBy == "priority")
+                        {
+                            <span>@(sortDescending ? "∨" : "∧")</span>
+                        }    
+                    </th>
+                    <th @onclick="() => SortByDueDate()" style="cursor:pointer;">
+                        Due
+                        @if (sortBy == "due")
+                        {
+                            <span>@(sortDescending ? "∨" : "∧")</span>
+                            
+                        }
+                    </th>
                     <th>Done</th>
                     <th></th>
                 </tr>
@@ -91,6 +104,57 @@ else
     private List<TodoItem> tasks = new();
     private TodoItem draft = new() { Priority = "M", Category = "General" };
     private int _editId;
+    private string sortBy = "";
+    private bool sortDescending = false;
+
+    // sort by priority: H > M > L
+    private void SortByPriority()
+    {
+        if (sortBy == "priority")
+        {
+            sortDescending = !sortDescending; // reverse order
+        }
+        else
+        {
+            sortBy = "priority";
+            sortDescending = true; // default to descending
+        }
+        tasks = tasks.OrderByDescending(t => GetPriorityValue(t.Priority)) // H > M > L
+                     .ThenBy(t => t.DueDate ?? DateTime.MaxValue) // then by due date ascending
+                     .ToList();
+        if (!sortDescending) tasks.Reverse();
+    }
+
+    // sort by due date: nearest first
+    private void SortByDueDate()
+    {
+        if (sortBy == "due")
+        {
+            sortDescending = !sortDescending;
+        }
+        else
+        {
+            sortBy = "due";
+            sortDescending = false; // default to ascending
+        }
+
+        tasks = tasks
+            .OrderBy(t => t.DueDate ?? DateTime.MaxValue)
+            .ToList();
+
+        if (sortDescending)
+            tasks.Reverse();
+    }
+
+    // map priority string to numeric value for sorting
+    private int GetPriorityValue(string? p) => p switch
+    {
+        "H" => 3,
+        "M" => 2,
+        "L" => 1,
+        _ => 0
+    };
+
 
     protected override void OnInitialized()
     {
