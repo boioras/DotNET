@@ -317,5 +317,5 @@ C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\refint\ToDoListProgram.dl
 C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\ToDoListProgram.pdb
 C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\ToDoListProgram.genruntimeconfig.cache
 C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\ref\ToDoListProgram.dll
-C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\cr88q7yozc-hjn7jpvxr0.gz
-C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\kd5co15dcr-hjn7jpvxr0.gz
+C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\cr88q7yozc-9tipxoypyc.gz
+C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\kd5co15dcr-9tipxoypyc.gz

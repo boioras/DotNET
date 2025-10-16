@@ -20,7 +20,7 @@ namespace ToDoListProgram.Data
             var dataDir = Path.Combine(AppContext.BaseDirectory, "Data");
             Directory.CreateDirectory(dataDir);
             _filePath = Path.Combine(dataDir, "tasks.json");
-
+            
             Load();
         }
 
@@ -74,6 +74,7 @@ namespace ToDoListProgram.Data
         {
             try
             {
+                
                 var json = JsonSerializer.Serialize(_tasks, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(_filePath, json);
                 LastSaved = DateTime.UtcNow;
@@ -91,6 +92,7 @@ namespace ToDoListProgram.Data
         {
             try
             {
+                 
                 if (File.Exists(_filePath))
                 {
                     var json = File.ReadAllText(_filePath);
