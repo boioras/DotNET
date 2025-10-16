@@ -10,8 +10,10 @@
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
+<div class="nav-scrollable sidebar" onclick="document.querySelector('.navbar-toggler').click()">
+
+    @*home,task and any need to be at top *@ 
+    <nav class="nav flex-column flex-grow-1">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
@@ -19,41 +21,31 @@
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-      
-        <div class="nav-item px-3">
             <NavLink class="nav-link" href="tasks">
                 <span class="oi oi-list" aria-hidden="true"></span> My Tasks
             </NavLink>
         </div>
 
-        <div class="login-section">
-            @if (UserService.IsLoggedIn())
-            {
-                <div class="user-info text-light mb-2">
-                    <strong>@UserService.GetCurrentUser()?.Username</strong>
-                </div>
-                <a class="nav-link text-light" href="" @onclick:preventDefault @onclick="HandleLogout">
-                    <span class="bi bi-box-arrow-right"></span> Logout
-                </a>
-            }
-            else
-            {
-                <NavLink class="nav-link text-light" href="login">
-                    <span class="bi bi-person-circle"></span> Login
-                </NavLink>
-            }
-        </div>
+        @*here add more at top *@ 
     </nav>
+
+    <div class="login-section nav-bottom px-3 pt-2 border-top">
+        @if (UserService.IsLoggedIn())
+        {
+            <div class="user-info text-light mb-2">
+                <strong>@UserService.GetCurrentUser()?.Username</strong>
+            </div>
+            <a class="nav-link text-light px-0" href="" @onclick:preventDefault @onclick="HandleLogout">
+                <span class="bi bi-box-arrow-right"></span> Logout
+            </a>
+        }
+        else
+        {
+            <NavLink class="nav-link text-light px-0" href="login">
+                <span class="bi bi-person-circle"></span> Login
+            </NavLink>
+        }
+    </div>
 </div>
 
 @code {
@@ -62,14 +54,14 @@
     protected override void OnInitialized()
     {
         onChangeHandler = () => InvokeAsync(StateHasChanged);
-        UserService.OnChange += onChangeHandler; // state has changed
+        UserService.OnChange += onChangeHandler; 
     }
 
     private async Task HandleLogout()
     {
         UserService.Logout();
         await Task.Delay(200);
-        Nav.NavigateTo("/login", forceLoad: true); //jump to login page
+        Nav.NavigateTo("/login", forceLoad: true); // jump to login page
     }
 
     public void Dispose()
@@ -77,4 +69,5 @@
         if (onChangeHandler != null) UserService.OnChange -= onChangeHandler; // delete the changed state
     }
 }
+
 
