@@ -147,8 +147,6 @@ C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\compress
 C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\7lfen7vlyu-h1s4sie4z3.gz
 C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\xm97xrvxax-4d85u1mtcx.gz
 C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\xtg2s6hiot-0j3bgjxly4.gz
-C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\cr88q7yozc-jgcvok7jsn.gz
-C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\kd5co15dcr-jgcvok7jsn.gz
 C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\staticwebassets.build.json
 C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\staticwebassets.build.json.cache
 C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\staticwebassets.development.json
@@ -319,3 +317,5 @@ C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\ToDoListProgram.genruntim
 C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\ref\ToDoListProgram.dll
 C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\cr88q7yozc-9tipxoypyc.gz
 C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\kd5co15dcr-9tipxoypyc.gz
+C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\cr88q7yozc-9tipxoypyc.gz
+C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\kd5co15dcr-9tipxoypyc.gz

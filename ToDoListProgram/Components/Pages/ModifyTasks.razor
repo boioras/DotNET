@@ -174,8 +174,15 @@ else
 
     private void Refresh()
     {
-        LoadTasks();
-        StateHasChanged();
+        Task.Delay(50) // tiny yield so file lock releases
+            .ContinueWith(_ =>
+            {
+                InvokeAsync(() =>
+                {
+                    LoadTasks(); // re-read from disk
+                    StateHasChanged(); // repaint
+                });
+            }, TaskScheduler.Current);
     }
 
     private void SaveTask()
