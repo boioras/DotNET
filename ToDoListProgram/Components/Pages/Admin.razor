@@ -1,0 +1,260 @@
+@page "/admin"
+@rendermode InteractiveServer
+@using ToDoListProgram.Data
+@inject ToDoListProgram.Service.UserService UserService
+@inject NavigationManager Nav
+
+<h3>Add New User</h3>
+
+<div class="row g-2 mb-3">
+    <div class="col-sm-4">
+        <input class="form-control" placeholder="Username" @bind="newUsername" />
+    </div>
+    <div class="col-sm-4">
+        <input class="form-control" placeholder="Password" type="password" @bind="newPassword" />
+    </div>
+    <div class="col-sm-3">
+        <select class="form-select" @bind="newRole">
+            <option>User</option>
+            <option>Admin</option>
+        </select>
+    </div>
+    <div class="col-sm-1">
+        <button class="btn btn-primary w-100" @onclick="AddUser">Add</button>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-info py-2">@message</div>
+}
+
+<h3 class="mt-4">All Users</h3>
+<table class="table table-striped">
+  <thead>
+    <tr>
+    <th style="width:70px;">Id</th>
+    <th style="width:260px;">Username</th>
+    <th style="width:160px;">Role</th>
+    <th class="text-end" style="width:240px;">Actions</th>
+  </tr>
+  </thead>
+
+  <tbody>
+  @foreach (var u in users)
+  {
+    <tr>
+      <td>@u.Id</td>
+
+      <td>
+        @if (editingId == u.Id)
+        { <input class="form-control form-control-sm" @bind="editModel.Username" /> }
+        else { @u.Username }
+      </td>
+
+      <td>
+        @if (editingId == u.Id)
+        {
+          <select class="form-select form-select-sm" @bind="editModel.Role">
+            <option>User</option>
+            <option>Admin</option>
+          </select>
+        }
+        else { @u.Role }
+      </td>
+
+      <td class="text-end">
+        @if (editingId == u.Id)
+        {
+          <button class="btn btn-sm btn-success me-2"
+                  disabled="@(LastAdminId == u.Id && !string.Equals(editModel.Role, "Admin", StringComparison.OrdinalIgnoreCase))"
+                  @onclick="() => Save(u.Id)">Save</button>
+          <button class="btn btn-sm btn-secondary" @onclick="Cancel">Cancel</button>
+        }
+        else if (resettingId == u.Id)
+        {
+          <div class="d-flex gap-2">
+            <input class="form-control form-control-sm" type="password" placeholder="New password" @bind="newPwd" />
+            <input class="form-control form-control-sm" type="password" placeholder="Confirm"     @bind="newPwd2" />
+            <button class="btn btn-sm btn-success"   @onclick="() => DoReset(u.Id)">Save</button>
+            <button class="btn btn-sm btn-secondary" @onclick="CancelReset">Cancel</button>
+          </div>
+          @if (!string.IsNullOrEmpty(resetMsg))
+          { <div class="text-danger small mt-1">@resetMsg</div> }
+        }
+        else
+        {
+          var isSelf = UserService.GetCurrentUser()?.Id == u.Id;
+
+          <button class="btn btn-sm btn-warning me-2" @onclick="() => StartEdit(u)">Edit</button>
+          <button class="btn btn-sm btn-outline-secondary me-2" @onclick="() => StartReset(u.Id)">Reset</button>
+          <button class="btn btn-sm btn-danger"
+                  title="@(isSelf ? "Cannot delete yourself" : (LastAdminId == u.Id ? "Cannot delete the last Admin" : "Delete"))"
+                  disabled="@(isSelf || LastAdminId == u.Id)"
+                  @onclick="() => ConfirmDelete(u.Id)">Delete</button>
+        }
+      </td>
+    </tr>
+  }
+  </tbody>
+</table>
+
+
+@if (deleteConfirmId is not null)
+{
+    <div class="alert alert-danger d-flex justify-content-between align-items-center">
+        <span>Delete user #@deleteConfirmId ? This cannot be undone.</span>
+        <div>
+            <button class="btn btn-sm btn-danger me-2" @onclick="DoDelete">Delete</button>
+            <button class="btn btn-sm btn-secondary" @onclick="() => deleteConfirmId = null">Cancel</button>
+        </div>
+    </div>
+}
+
+@code {
+    private List<User> users = new();
+
+    // add new user
+    private string newUsername = "";
+    private string newPassword = "";
+    private string newRole     = "User";
+    private string message     = "";
+
+    // edit/delete
+    private int? editingId = null;
+    private int? deleteConfirmId = null;
+    private User editModel = new();
+
+    // reset password
+    private int? resettingId = null;
+    private string newPwd = "";
+    private string newPwd2 = "";
+    private string resetMsg = "";
+
+    // if there is only one admin, retern id
+    private int? LastAdminId {
+        get {
+            var admins = users.Where(u => string.Equals(u.Role, "Admin", StringComparison.OrdinalIgnoreCase)).ToList();
+            return admins.Count == 1 ? admins[0].Id : (int?)null;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        if (!UserService.IsAdmin()) { Nav.NavigateTo("/"); return; }
+        Reload();
+    }
+
+    private void Reload() => users = UserService.GetAllUsers();
+
+    //add new customer
+    private void AddUser()
+    {
+        message = "";
+        if (string.IsNullOrWhiteSpace(newUsername) || string.IsNullOrWhiteSpace(newPassword))
+        {
+            message = "Username and password are required.";
+            return;
+        }
+
+        if (UserService.CreateUser(newUsername, newPassword, newRole))
+        {
+            message = $"User '{newUsername}' created.";
+            newUsername = newPassword = "";
+            newRole = "User";
+            Reload();
+        }
+        else
+        {
+            message = "Create failed. Username may exist or invalid input.";
+        }
+    }
+
+    // edit
+    private void StartEdit(User u)
+    {
+        editingId = u.Id;
+        editModel = new User { Id = u.Id, Username = u.Username, Password = u.Password, Role = u.Role };
+    }
+
+    private void Cancel()
+    {
+        editingId = null;
+        editModel = new User();
+    }
+
+    private void Save(int id)
+    {
+        if (editModel.Id != id) return;
+
+        // the last admin cannot be the user
+        if (LastAdminId == id && !string.Equals(editModel.Role, "Admin", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        if (UserService.UpdateUser(editModel))
+        {
+            Cancel();
+            Reload();
+        }
+    }
+
+    // delete
+    private void ConfirmDelete(int id) => deleteConfirmId = id;
+
+    private void DoDelete()
+    {
+        if (deleteConfirmId is int id)
+        {
+            // not allow to delete the last admin
+            if (LastAdminId == id) { deleteConfirmId = null; return; }
+
+            if (UserService.DeleteUser(id))
+            {
+                deleteConfirmId = null;
+                Reload();
+            }
+        }
+    }
+
+    // reset password
+    private void StartReset(int id)
+    {
+        resettingId = id;
+        newPwd = "";
+        newPwd2 = "";
+        resetMsg = "";
+    }
+
+    private void CancelReset()
+    {
+        resettingId = null;
+        newPwd = "";
+        newPwd2 = "";
+        resetMsg = "";
+    }
+
+    private void DoReset(int id)
+    {
+        resetMsg = "";
+        if (string.IsNullOrWhiteSpace(newPwd) || newPwd.Length < 3)
+        {
+            resetMsg = "Password must be at least 3 characters.";
+            return;
+        }
+        if (!string.Equals(newPwd, newPwd2, StringComparison.Ordinal))
+        {
+            resetMsg = "Two passwords do not match.";
+            return;
+        }
+
+        if (UserService.ResetPassword(id, newPwd))
+        {
+            CancelReset();
+            Reload();
+        }
+        else
+        {
+            resetMsg = "Reset failed.";
+        }
+    }
+}

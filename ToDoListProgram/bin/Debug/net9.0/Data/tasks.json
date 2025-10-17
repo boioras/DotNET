@@ -7,23 +7,5 @@
     "Category": "Homework",
     "Priority": "M",
     "DueDate": "2025-10-19T00:00:00"
-  },
-  {
-    "Id": 2,
-    "UserId": 1,
-    "Title": "English",
-    "IsCompleted": false,
-    "Category": "Homework",
-    "Priority": "H",
-    "DueDate": "2025-10-17T00:00:00"
-  },
-  {
-    "Id": 3,
-    "UserId": 2,
-    "Title": "asd",
-    "IsCompleted": false,
-    "Category": "General",
-    "Priority": "M",
-    "DueDate": null
   }
 ]

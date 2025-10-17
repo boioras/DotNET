@@ -9,14 +9,16 @@
 
 <div class="login-container">
     <div class="form-group mb-3">
-        <label>Username: </label>
-        <input @bind="username" class="form-control"/><br />
-        <label>Password: </label>
-        <input @bind="password" class="form-control"/><br />
-    </div>
-    <div class="d-flex align-items-center">
-        <button class="btn btn-primary" @onclick="HandleLogin">Login</button>
-        <a href="/register" align="right">Register here</a>
+        <label>Username:</label>
+        <input @bind="username" class="form-control" /><br />
+
+        <label>Password:</label>
+        <input @bind="password" type="password" class="form-control" /><br />
+
+        <div class="d-flex align-items-center">
+            <button class="btn btn-primary" @onclick="HandleLogin">Login</button>
+            <a href="/register" class="ms-auto">Register here</a>
+        </div>
     </div>
 
     @if (!string.IsNullOrEmpty(message))
@@ -34,7 +36,17 @@
     {
         if (UserService.Login(username, password))
         {
-            Nav.NavigateTo("/");
+            // detect whether it is a user or an admin
+            if (UserService.IsAdmin())
+            {
+                // for admin
+                Nav.NavigateTo("/admin");
+            }
+            else
+            {
+                // for user
+                Nav.NavigateTo("/tasks");
+            }
         }
         else
         {
@@ -44,8 +56,8 @@
 }
 
 <style>
-    .login-container{
-        max-width:300px;
-        margin:100px auto;
-    }
+.login-container {
+    max-width: 300px;
+    margin: 100px auto;
+}
 </style>
