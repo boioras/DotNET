@@ -36,7 +36,7 @@ else
         </div>
         <div class="mb-2">
             <label>Due date</label>
-            <InputDate @bind-Value="draft.DueDate" class="form-control" />
+            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="draft.DueDate" class="form-control" step="1" />
         </div>
         <button class="btn btn-primary" type="submit">@(_editId == 0 ? "Add" : "Update")</button>
         @if (_editId != 0)
@@ -83,7 +83,7 @@ else
                         <td>@t.Title</td>
                         <td>@t.Category</td>
                         <td>@t.Priority</td>
-                        <td>@(t.DueDate?.ToString("d") ?? "-")</td>
+                        <td>@(t.DueDate?.ToString("g") ?? "-")</td>
                         <td>
                             <input type="checkbox" checked="@t.IsCompleted"
                                    @onchange="e => ToggleDone(t)" />
