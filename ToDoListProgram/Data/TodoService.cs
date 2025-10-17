@@ -10,7 +10,7 @@ namespace ToDoListProgram.Data
     {
         private readonly string _filePath;
         private readonly List<TodoItem> _tasks = new();
-        public event Action? OnChange;
+        public event Func<Task>? OnChange;
 
         public string FilePath => _filePath;
         public DateTime? LastSaved { get; private set; }
@@ -114,6 +114,17 @@ namespace ToDoListProgram.Data
             }
         }
 
-        private void NotifyStateChanged() => OnChange?.Invoke();
+        private void NotifyStateChanged()
+        {
+            var handler = OnChange;
+            if (handler != null)
+                _ = Task.Run(async () =>
+                {
+                    var tasks = handler.GetInvocationList()
+                                    .Cast<Func<Task>>()
+                                    .Select(f => f());
+                    await Task.WhenAll(tasks);
+                });
+        }
     }
 }

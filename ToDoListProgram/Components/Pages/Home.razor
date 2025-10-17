@@ -1,18 +1,46 @@
 ﻿@page "/"
 @rendermode InteractiveServer
 @inject ToDoListProgram.Service.UserService UserService
+@inject ToDoListProgram.Data.TodoService TodoService
 
 <PageTitle>Home</PageTitle>
 
-<div>
+<div class="container">
     @if (UserService.IsLoggedIn())
     {
-        <h2>Hello, @UserService.GetCurrentUser()?.Username!</h2>
-        <h3>Start managing your to-do list now!</h3>
+        var user = UserService.GetCurrentUser()!;
+        var tasks = TodoService
+                    .GetForUser(user.Id)
+                    .Where(t => !t.IsCompleted) // only pending
+                    .OrderBy(t => t.DueDate ?? DateTime.MaxValue) // soonest first
+                    .ToList();
+
+        <h2 class="mb-3">Hello, @user.Username!</h2>
+        <h5 class="mb-4">Up-coming tasks</h5>
+
+        @if (!tasks.Any())
+        {
+            <p class="text-muted">Nothing due right now – enjoy your day!</p>
+        }
+        else
+        {
+            <ul class="list-group">
+                @foreach (var t in tasks)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>@t.Title</span>
+                        <span class="text-nowrap ms-3">
+                            @t.DueDate?.ToString("g")  @* short date + time *@
+                        </span>
+                    </li>
+                }
+            </ul>
+        }
     }
     else
     {
         <h2>Welcome to your To-Do App!</h2>
+        <p>Please <a href="/login">log in</a> to see your tasks.</p>
     }
 </div>
 
@@ -22,11 +50,16 @@
     protected override void OnInitialized()
     {
         onChangeHandler = () => InvokeAsync(StateHasChanged);
-        UserService.OnChange += onChangeHandler; // state has changed
+        UserService.OnChange += onChangeHandler;
+        TodoService.OnChange += onChangeHandler;
     }
 
     public void Dispose()
     {
-        if (onChangeHandler != null) UserService.OnChange -= onChangeHandler; // delete the changed state
+        if (onChangeHandler != null)
+        {
+            UserService.OnChange -= onChangeHandler;
+            TodoService.OnChange -= onChangeHandler;
+        }
     }
 }

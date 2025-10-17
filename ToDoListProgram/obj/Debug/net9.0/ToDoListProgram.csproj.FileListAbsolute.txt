@@ -80,7 +80,6 @@ C:\Users\Administrator\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\
 C:\Users\Administrator\Documents\GitHub\DotNET\ToDoListProgram\bin\Debug\net9.0\Data\tasks.json
 C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\bin\Debug\net9.0\appsettings.Development.json
 C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\bin\Debug\net9.0\appsettings.json
-C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\bin\Debug\net9.0\Data\tasks.json
 C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\bin\Debug\net9.0\ToDoListProgram.staticwebassets.runtime.json
 C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\bin\Debug\net9.0\ToDoListProgram.staticwebassets.endpoints.json
 C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\bin\Debug\net9.0\ToDoListProgram.exe

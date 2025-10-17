@@ -161,7 +161,7 @@ else
         user = UserSvc.GetCurrentUser();
         if (user != null)
         {
-            TodoSvc.OnChange += Refresh;
+            TodoSvc.OnChange += Refresh;   // Refresh returns Task
             LoadTasks();
         }
     }
@@ -172,17 +172,14 @@ else
         Console.WriteLine($"[LoadTasks] user {user.Id} -> {tasks.Count} tasks");
     }
 
-    private void Refresh()
+    private async Task Refresh()
     {
-        Task.Delay(50) // tiny yield so file lock releases
-            .ContinueWith(_ =>
-            {
-                InvokeAsync(() =>
-                {
-                    LoadTasks(); // re-read from disk
-                    StateHasChanged(); // repaint
-                });
-            }, TaskScheduler.Current);
+        await Task.Delay(50); // tiny yield so file lock releases
+        await InvokeAsync(() =>
+        {
+            LoadTasks(); // re-read from disk
+            StateHasChanged(); // repaint
+        });
     }
 
     private void SaveTask()
