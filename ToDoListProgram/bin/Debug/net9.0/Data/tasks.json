@@ -3,7 +3,7 @@
     "Id": 1,
     "UserId": 2,
     "Title": "I have to do this",
-    "IsCompleted": false,
+    "IsCompleted": true,
     "Category": "General",
     "Priority": "M",
     "DueDate": "2025-10-18T08:30:00"
