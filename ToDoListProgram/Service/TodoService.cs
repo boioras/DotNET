@@ -3,17 +3,20 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using ToDoListProgram.Data;
 
-namespace ToDoListProgram.Data
+namespace ToDoListProgram.Service
 {
-    public class TodoService
+    public class TodoService : ITodoService
     {
-        private readonly string _filePath;
-        private readonly List<TodoItem> _tasks = new();
-        public event Func<Task>? OnChange;
+        private readonly string _filePath; // Path to tasks.json
+        private readonly List<TodoItem> _tasks = new(); // In-memory list of tasks
+        public event Func<Task>? OnChange; // Event to notify subscribers of changes
 
         public string FilePath => _filePath;
-        public DateTime? LastSaved { get; private set; }
+
+        // Timestamp of the last save operation
+        public DateTime? LastSaved { get; set; }
 
         public TodoService()
         {
@@ -24,11 +27,14 @@ namespace ToDoListProgram.Data
             Load();
         }
 
+        // Get all tasks
         public IEnumerable<TodoItem> GetAll() => _tasks;
 
+        // Get tasks for a specific user
         public IEnumerable<TodoItem> GetForUser(int userId)
             => _tasks.Where(t => t.UserId == userId).OrderBy(t => t.DueDate);
 
+        // Add a new task
         public void Add(TodoItem item)
         {
             if (item.Id == 0)
@@ -39,6 +45,7 @@ namespace ToDoListProgram.Data
             Save();
         }
 
+        // Delete a task by id
         public void Delete(int id)
         {
             var task = _tasks.FirstOrDefault(t => t.Id == id);
@@ -49,6 +56,7 @@ namespace ToDoListProgram.Data
             }
         }
 
+        // Update an existing task
         public void Update(TodoItem item)
         {
             var existing = _tasks.FirstOrDefault(t => t.Id == item.Id);
@@ -63,6 +71,7 @@ namespace ToDoListProgram.Data
             }
         }
 
+        // Reload tasks from file
         public void Reload()
         {
             _tasks.Clear();
@@ -70,7 +79,8 @@ namespace ToDoListProgram.Data
             NotifyStateChanged();
         }
 
-        private void Save()
+        // Save tasks to file
+        public void Save()
         {
             try
             {
@@ -88,7 +98,8 @@ namespace ToDoListProgram.Data
             }
         }
 
-        private void Load()
+        // Load tasks from file
+        public void Load()
         {
             try
             {
@@ -114,7 +125,8 @@ namespace ToDoListProgram.Data
             }
         }
 
-        private void NotifyStateChanged()
+        // Notify subscribers when the task list changes
+        public void NotifyStateChanged()
         {
             var handler = OnChange;
             if (handler != null)

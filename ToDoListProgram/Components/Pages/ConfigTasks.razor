@@ -1,4 +1,5 @@
 @page "/tasks"
+@page "/tasks/{viewUserId:int}" // for admin to view other users' tasks
 @rendermode InteractiveServer
 @using ToDoListProgram.Data
 @using ToDoListProgram.Service
@@ -8,7 +9,16 @@
 
 <PageTitle>Config Tasks</PageTitle>
 
-<h3>Config Tasks</h3>
+<h3>
+    @if (viewedUser is not null)
+    {
+        @:Tasks of @viewedUser.Username
+        @if (UserSvc.IsAdmin() && viewedUser.Id != UserSvc.GetCurrentUser()?.Id)
+        {
+            <span class="badge bg-primary ms-2">Admin editing mode</span>
+        }
+    }
+</h3>
 
 @if (user == null)
 {
@@ -16,34 +26,38 @@
 }
 else
 {
-    <!-- ADD / EDIT FORM  -->
-    <EditForm Model="@draft" OnValidSubmit="SaveTask" FormName="TaskForm" data-enhance="false">
-        <div class="mb-2">
-            <label>Title</label>
-            <InputText @bind-Value="draft.Title" class="form-control" />
-        </div>
-        <div class="mb-2">
-            <label>Category</label>
-            <InputText @bind-Value="draft.Category" class="form-control" />
-        </div>
-        <div class="mb-2">
-            <label>Priority</label>
-            <InputSelect @bind-Value="draft.Priority" class="form-select">
-                <option value="L">Low</option>
-                <option value="M">Medium</option>
-                <option value="H">High</option>
-            </InputSelect>
-        </div>
-        <div class="mb-2">
-            <label>Due date</label>
-            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="draft.DueDate" class="form-control" step="1" />
-        </div>
-        <button class="btn btn-primary" type="submit">@(_editId == 0 ? "Add" : "Update")</button>
-        @if (_editId != 0)
-        {
-            <button class="btn btn-secondary ms-2" @onclick="CancelEdit">Cancel</button>
-        }
-    </EditForm>
+    @if (!readOnly) // only show form if not read-only
+    {
+        <!-- ADD / EDIT FORM  -->
+        <EditForm Model="@draft" OnValidSubmit="SaveTask" FormName="TaskForm" data-enhance="false">
+            <div class="mb-2">
+                <label>Title</label>
+                <InputText @bind-Value="draft.Title" class="form-control" />
+            </div>
+            <div class="mb-2">
+                <label>Category</label>
+                <InputText @bind-Value="draft.Category" class="form-control" />
+            </div>
+            <div class="mb-2">
+                <label>Priority</label>
+                <InputSelect @bind-Value="draft.Priority" class="form-select">
+                    <option value="L">Low</option>
+                    <option value="M">Medium</option>
+                    <option value="H">High</option>
+                </InputSelect>
+            </div>
+            <div class="mb-2">
+                <label>Due date</label>
+                <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="draft.DueDate" class="form-control" step="1" />
+            </div>
+            <button class="btn btn-primary" type="submit">@(_editId == 0 ? "Add" : "Update")</button>
+            @if (_editId != 0)
+            {
+                <button class="btn btn-secondary ms-2" @onclick="CancelEdit">Cancel</button>
+            }
+        </EditForm>
+    }
+
 
     <!-- TASK TABLE -->
     @if (!tasks.Any())
@@ -86,11 +100,15 @@ else
                         <td>@(t.DueDate?.ToString("g") ?? "-")</td>
                         <td>
                             <input type="checkbox" checked="@t.IsCompleted"
+                                   disabled="@readOnly"
                                    @onchange="e => ToggleDone(t)" />
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-warning" @onclick="() => EditTask(t)">Edit</button>
-                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteTask(t.Id)">Delete</button>
+                            @if (!readOnly)
+                            {
+                                <button class="btn btn-sm btn-warning" @onclick="() => EditTask(t)"> Edit </button>
+                                <button class="btn btn-sm btn-danger ms-1" @onclick="() => DeleteTask(t.Id)"> Delete </button>
+                            }
                         </td>
                     </tr>
                 }
@@ -100,7 +118,10 @@ else
 }
 
 @code {
-    private User? user;
+    [Parameter] public int? viewUserId { get; set; } // for admin to view other users' tasks
+    private User? user; // current user
+    private User? viewedUser; // user whose tasks are being viewed
+    private bool readOnly = false; // (read only = true) if  non-admin users view another user's tasks
     private List<TodoItem> tasks = new();
     private TodoItem draft = new() { Priority = "M", Category = "General" };
     private int _editId;
@@ -155,23 +176,73 @@ else
         _ => 0
     };
 
-
+    // initialization
     protected override void OnInitialized()
     {
+        // user = UserSvc.GetCurrentUser();
+        // if (user != null)
+        // {
+        //     TodoSvc.OnChange += Refresh;   //Refresh returns Task
+        //     LoadTasks();
+        // }
+        TodoSvc.OnChange += Refresh;   // Refresh returns Task
+    }
+
+    // handle parameter changes (e.g., viewUserId)
+    protected override void OnParametersSet()
+    {
         user = UserSvc.GetCurrentUser();
-        if (user != null)
+
+        if (user == null) // not logged in
         {
-            TodoSvc.OnChange += Refresh;   // Refresh returns Task
-            LoadTasks();
+            viewedUser = null;
+            tasks.Clear();
+            return;
+        }
+        if (viewUserId.HasValue)
+        {
+            if (!UserSvc.IsAdmin())
+            {
+                Nav.NavigateTo("/"); // non-admins cannot view others' tasks
+                return;
+            }
+            viewedUser = UserSvc.GetAllUsers().FirstOrDefault(u => u.Id == viewUserId.Value);
+            if(viewedUser == null)
+            {
+                tasks.Clear();
+                return; // user not found
+            }
+            readOnly = false; // admin can edit
+        }
+        else
+        {
+            viewedUser = user;
+            readOnly = false;
+        }
+        LoadTasks();
+    }
+
+    // load tasks for viewed user
+    private void LoadTasks()
+    {
+        if(viewedUser is null)
+        {
+            tasks.Clear();
+            return;
+        }
+        tasks = TodoSvc.GetForUser(viewedUser.Id).ToList(); // load tasks from service
+        // apply current sort
+        if(sortBy == "priority")
+        {
+            SortByPriority();
+        }
+        else if(sortBy == "due")
+        {
+            SortByDueDate();
         }
     }
 
-    private void LoadTasks()
-    {
-        tasks = TodoSvc.GetForUser(user!.Id).ToList();
-        Console.WriteLine($"[LoadTasks] user {user.Id} -> {tasks.Count} tasks");
-    }
-
+    // refresh handler for service change events
     private async Task Refresh()
     {
         await Task.Delay(50); // tiny yield so file lock releases
@@ -182,11 +253,14 @@ else
         });
     }
 
+    // save new or edited task
     private void SaveTask()
     {
+        if (readOnly || viewedUser == null) return; // non-admins cannot edit others' tasks
+
         Console.WriteLine($"[SaveTask] title='{draft.Title}', user={user?.Id}, editId={_editId}");
 
-        if (string.IsNullOrWhiteSpace(draft.Title))
+        if (string.IsNullOrWhiteSpace(draft.Title)) // validate title
         {
             Console.WriteLine("[SaveTask] empty title – abort");
             return;
@@ -194,24 +268,25 @@ else
 
         if (_editId == 0)        // ADD
         {
-            draft.UserId = user!.Id;
+            draft.UserId = viewedUser.Id; // assign to viewed user
             draft.Id = 0;          // let service assign PK
             TodoSvc.Add(draft);
-            Console.WriteLine($"[SaveTask] added task '{draft.Title}' for user {user.Id}");
         }
         else                       // UPDATE
         {
             draft.Id = _editId;
-            draft.UserId = user!.Id;
+            draft.UserId = viewedUser.Id;
             TodoSvc.Update(draft);
-            Console.WriteLine($"[SaveTask] updated task {draft.Id}");
         }
 
         CancelEdit();
     }
 
+    // start edit of existing task
     private void EditTask(TodoItem src)
     {
+        if (readOnly) return; // non-admins cannot edit others' tasks
+
         _editId = src.Id;
         draft = new TodoItem
         {
@@ -224,19 +299,29 @@ else
         };
     }
 
+    // cancel edit
     private void CancelEdit()
     {
         _editId = 0;
         draft = new() { Priority = "M", Category = "General" };
     }
 
+    // toggle done status
     private void ToggleDone(TodoItem t)
     {
+        if (readOnly) return; // non-admins cannot edit others' tasks
+
         t.IsCompleted = !t.IsCompleted;
         TodoSvc.Update(t);
     }
 
-    private void DeleteTask(int id) => TodoSvc.Delete(id);
+    // delete task
+    private void DeleteTask(int id)
+    {
+        if (readOnly) return; // non-admins cannot edit others' tasks
+
+        TodoSvc.Delete(id);
+    }
 
     public void Dispose() => TodoSvc.OnChange -= Refresh;
 }
