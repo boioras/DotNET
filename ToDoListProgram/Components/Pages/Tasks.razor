@@ -7,12 +7,12 @@
 @inject UserService UserSvc
 @inject NavigationManager Nav
 
-<PageTitle>Config Tasks</PageTitle>
+<PageTitle>Tasks</PageTitle>
 
 <h3>
     @if (viewedUser is not null)
     {
-        @:Tasks of @viewedUser.Username
+        @:@viewedUser.Username's Tasks
         @if (UserSvc.IsAdmin() && viewedUser.Id != UserSvc.GetCurrentUser()?.Id)
         {
             <span class="badge bg-primary ms-2">Admin editing mode</span>
