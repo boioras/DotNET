@@ -2,7 +2,7 @@
   {
     "Id": 1,
     "UserId": 2,
-    "Title": "I have to do this",
+    "Title": "I have to do this~~",
     "IsCompleted": false,
     "Category": "General",
     "Priority": "M",
@@ -12,7 +12,7 @@
     "Id": 2,
     "UserId": 2,
     "Title": "Dinner time",
-    "IsCompleted": false,
+    "IsCompleted": true,
     "Category": "Eatin",
     "Priority": "L",
     "DueDate": "2025-10-19T01:50:02"

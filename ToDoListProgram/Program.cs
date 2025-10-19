@@ -3,7 +3,7 @@ using ToDoListProgram.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<ToDoListProgram.Data.TodoService>();
+builder.Services.AddSingleton<TodoService>();
 builder.Services.AddSingleton<ToDoListProgram.Service.UserService>();
 
 

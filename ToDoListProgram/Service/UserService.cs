@@ -3,21 +3,21 @@ using ToDoListProgram.Data;
 
 namespace ToDoListProgram.Service
 {
-    public class UserService
+    public class UserService : IUserService
     {
         private readonly List<User> users = new();
-        private int nextUserId = 1;
+        private int nextUserId = 1; // auto-increment user ID
         private User? currentUser;
 
-        public event Func<Task>? OnChange; 
+        public event Func<Task>? OnChange; // event to notify subscribers of changes
 
-               private const string AdminRole = "Admin";
+        private const string AdminRole = "Admin";
         private const string UserRole  = "User";
         private const string AdminUsername = "admin";
         private const string AdminDefaultPassword = "123";
 
         private readonly string usersStore =
-            Path.Combine(AppContext.BaseDirectory, "Data", "users.json");
+            Path.Combine(AppContext.BaseDirectory, "Data", "users.json"); // users storage file
 
         public UserService()
         {
@@ -25,6 +25,7 @@ namespace ToDoListProgram.Service
             EnsureAdminExists(); // at least have one admin
         }
 
+        // create user
         public bool CreateUser(string? username, string? password, string? role)
         {
             username = username?.Trim();
@@ -55,7 +56,8 @@ namespace ToDoListProgram.Service
             NotifyStateChanged();
             return true;
         }
-        
+
+        // reset password
         public bool ResetPassword(int userId, string? newPassword)
         {
             newPassword = newPassword?.Trim();
@@ -69,6 +71,7 @@ namespace ToDoListProgram.Service
             NotifyStateChanged();
             return true;
         }
+
         // register
         public bool Register(string? username, string? password)
         {
@@ -91,7 +94,8 @@ namespace ToDoListProgram.Service
             NotifyStateChanged();
             return true;
         }
-        // loginin
+
+        // login
         public bool Login(string? username, string? password)
         {
             username = username?.Trim();
@@ -108,19 +112,23 @@ namespace ToDoListProgram.Service
             return true;
         }
 
+        // check login status
         public bool IsLoggedIn() => currentUser != null;
 
+        // logout
         public void Logout()
         {
             currentUser = null;
             NotifyStateChanged();
         }
 
+        // get current user
         public User? GetCurrentUser() => currentUser;
 
+        // get all users
         public List<User> GetAllUsers() => users.ToList();
 
-        // judge role
+        // judge role if it's admin
         public bool IsAdmin()
         {
             var u = currentUser;
@@ -128,9 +136,11 @@ namespace ToDoListProgram.Service
             return u.Role.Equals(AdminRole, StringComparison.OrdinalIgnoreCase)
                 || u.Username.Equals(AdminUsername, StringComparison.OrdinalIgnoreCase);
         }
+
+        // judge role if it's user
         public bool IsUser() => currentUser is not null && !IsAdmin();
 
-        // admin page
+        // update user
         public bool UpdateUser(User updated)
         {
             var idx = users.FindIndex(u => u.Id == updated.Id);
@@ -154,6 +164,7 @@ namespace ToDoListProgram.Service
             return true;
         }
 
+        // delete user
         public bool DeleteUser(int id)
         {
             // admin cannot delete himself
@@ -171,8 +182,8 @@ namespace ToDoListProgram.Service
             return removed;
         }
 
-        
-        private void EnsureAdminExists()
+        // ensure admin exists
+        public void EnsureAdminExists()
         {
             if (!users.Any(u => u.Role.Equals(AdminRole, StringComparison.OrdinalIgnoreCase)))
             {
@@ -192,21 +203,24 @@ namespace ToDoListProgram.Service
                 nextUserId = Math.Max(nextUserId, users.Max(u => u.Id) + 1);
         }
 
-        private bool IsLastAdmin(int targetUserId)
+        // check if it's the last admin
+        public bool IsLastAdmin(int targetUserId)
         {
             var adminIds = users.Where(u => u.Role.Equals(AdminRole, StringComparison.OrdinalIgnoreCase))
                                 .Select(u => u.Id).ToList();
             return adminIds.Count == 1 && adminIds[0] == targetUserId;
         }
 
-        private void SaveUsers()
+        // save users
+        public void SaveUsers()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(usersStore)!);
             var json = JsonSerializer.Serialize(users, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(usersStore, json);
         }
 
-        private void LoadUsers()
+        // load users
+        public void LoadUsers()
         {
             try
             {
@@ -223,7 +237,8 @@ namespace ToDoListProgram.Service
             }
         }
 
-        private async void NotifyStateChanged()
+        // notify state changed
+        public async void NotifyStateChanged()
         {
             if (OnChange == null) return;
             var handlers = OnChange.GetInvocationList().Cast<Func<Task>>();

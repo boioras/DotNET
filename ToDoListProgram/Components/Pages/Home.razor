@@ -2,7 +2,7 @@
 @rendermode InteractiveServer
 @using ToDoListProgram.Data
 @inject ToDoListProgram.Service.UserService UserService
-@inject ToDoListProgram.Data.TodoService TodoService
+@inject ToDoListProgram.Service.TodoService TodoService
 
 <PageTitle>Home</PageTitle>
 
@@ -28,6 +28,11 @@
         else
         {
             <ul class="list-group mb-0">
+                <li class="list-group-item list-group-item-secondary fw-bold
+                                d-flex justify-content-between align-items-center">
+                    <span>To-do Tasks</span>
+                    <span>Due Date</span>
+                </li>
                 @foreach (var t in open)
                 {
                     <li class="list-group-item d-flex justify-content-between align-items-center" @key="t.Id">
@@ -50,7 +55,7 @@
                 <li class="list-group-item list-group-item-secondary fw-bold
                         d-flex justify-content-between align-items-center">
                     <span>Completed Tasks</span>
-                    <span></span>
+                    <span>Due Date</span>
                 </li>
                 @foreach (var t in done)
                 {
@@ -75,15 +80,17 @@
 </div>
 
 @code{
-    private Func<Task>? onChangeHandler;
+    private Func<Task>? onChangeHandler; // handler for service change events
 
+    // subscribe to service change events
     protected override void OnInitialized()
     {
-        onChangeHandler = () => InvokeAsync(StateHasChanged);
-        UserService.OnChange += onChangeHandler;
-        TodoService.OnChange += onChangeHandler;
+        onChangeHandler = () => InvokeAsync(StateHasChanged); // re-render on changes
+        UserService.OnChange += onChangeHandler; 
+        TodoService.OnChange += onChangeHandler; 
     }
 
+    // toggle task completion
     private async Task Toggle(TodoItem item)
     {
         item.IsCompleted = !item.IsCompleted; // flags
@@ -91,6 +98,7 @@
         await Task.CompletedTask; // keeps signature async
     }
 
+    // clean up event handlers
     public void Dispose()
     {
         if (onChangeHandler != null)
