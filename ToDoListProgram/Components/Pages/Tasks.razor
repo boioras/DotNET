@@ -6,6 +6,7 @@
 @inject TodoService TodoSvc
 @inject UserService UserSvc
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 
 <PageTitle>Tasks</PageTitle>
 
@@ -26,38 +27,39 @@
 }
 else
 {
-    @if (!readOnly) // only show form if not read-only
-    {
-        <!-- ADD / EDIT FORM  -->
-        <EditForm Model="@draft" OnValidSubmit="SaveTask" FormName="TaskForm" data-enhance="false">
-            <div class="mb-2">
-                <label>Title</label>
-                <InputText @bind-Value="draft.Title" class="form-control" />
-            </div>
-            <div class="mb-2">
-                <label>Category</label>
-                <InputText @bind-Value="draft.Category" class="form-control" />
-            </div>
-            <div class="mb-2">
-                <label>Priority</label>
-                <InputSelect @bind-Value="draft.Priority" class="form-select">
-                    <option value="L">Low</option>
-                    <option value="M">Medium</option>
-                    <option value="H">High</option>
-                </InputSelect>
-            </div>
-            <div class="mb-2">
-                <label>Due date</label>
-                <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="draft.DueDate" class="form-control" step="1" />
-            </div>
-            <button class="btn btn-primary" type="submit">@(_editId == 0 ? "Add" : "Update")</button>
-            @if (_editId != 0)
-            {
-                <button class="btn btn-secondary ms-2" @onclick="CancelEdit">Cancel</button>
-            }
-        </EditForm>
-    }
+    <!-- Add / Edit Form  -->
+    <EditForm Model="@draft" OnValidSubmit="SaveTask" FormName="TaskForm" data-enhance="false">
+        <!-- Validation for empty/missing fields -->
+        <ValidationSummary class="alert alert-danger" />
 
+        <div class="mb-2">
+            <label>Title</label>
+            <InputText @bind-Value="draft.Title" class="form-control" />
+        </div>
+        <div class="mb-2">
+            <label>Category</label>
+            <InputText @bind-Value="draft.Category" class="form-control" />
+        </div>
+        <div class="mb-2">
+            <label>Priority</label>
+            <InputSelect @bind-Value="draft.Priority" class="form-select">
+                <option value="">-- choose --</option> <!-- forces selection -->
+                <option value="L">Low</option>
+                <option value="M">Medium</option>
+                <option value="H">High</option>
+            </InputSelect>
+        </div>
+        <div class="mb-2">
+            <label>Due date</label>
+            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="draft.DueDate" class="form-control" step="1" />
+        </div>
+
+        <button class="btn btn-primary" type="submit">@(_editId == 0 ? "Add" : "Update")</button>
+        @if (_editId != 0)
+        {
+            <button class="btn btn-secondary ms-2" @onclick="CancelEdit">Cancel</button>
+        }
+    </EditForm>
 
     <!-- TASK TABLE -->
     @if (!tasks.Any())
@@ -83,7 +85,6 @@ else
                         @if (sortBy == "due")
                         {
                             <span>@(sortDescending ? "∨" : "∧")</span>
-                            
                         }
                     </th>
                     <th>Done</th>
@@ -179,12 +180,6 @@ else
     // initialization
     protected override void OnInitialized()
     {
-        // user = UserSvc.GetCurrentUser();
-        // if (user != null)
-        // {
-        //     TodoSvc.OnChange += Refresh;   //Refresh returns Task
-        //     LoadTasks();
-        // }
         TodoSvc.OnChange += Refresh;   // Refresh returns Task
     }
 
@@ -253,26 +248,38 @@ else
         });
     }
 
-    // save new or edited task
-    private void SaveTask()
+    // Enforce 2+ chars, mandatory date/time & priority
+    private async Task SaveTask()
     {
-        if (readOnly || viewedUser == null) return; // non-admins cannot edit others' tasks
+        if (readOnly || viewedUser == null) return;
 
-        Console.WriteLine($"[SaveTask] title='{draft.Title}', user={user?.Id}, editId={_editId}");
+        // Hard validation
+        var errors = new List<string>();
 
-        if (string.IsNullOrWhiteSpace(draft.Title)) // validate title
+        if (string.IsNullOrWhiteSpace(draft.Title) || draft.Title.Trim().Length < 2)
+            errors.Add("Title must be at least 2 characters.");
+        if (string.IsNullOrWhiteSpace(draft.Category))
+            errors.Add("Category is required.");
+        if (string.IsNullOrWhiteSpace(draft.Priority))
+            errors.Add("Priority is required.");
+        if (!draft.DueDate.HasValue)
+            errors.Add("Due date & time are required.");
+
+        if (errors.Any())
         {
-            Console.WriteLine("[SaveTask] empty title – abort");
+            // Show first error in ValidationSummary and stop
+            foreach (var e in errors) Console.WriteLine($"[SaveTask] {e}");
             return;
         }
 
-        if (_editId == 0)        // ADD
+        // Proceed with save
+        if (_editId == 0) // Add
         {
-            draft.UserId = viewedUser.Id; // assign to viewed user
-            draft.Id = 0;          // let service assign PK
+            draft.UserId = viewedUser.Id;
+            draft.Id = 0;
             TodoSvc.Add(draft);
         }
-        else                       // UPDATE
+        else // Update
         {
             draft.Id = _editId;
             draft.UserId = viewedUser.Id;
