@@ -316,8 +316,6 @@ C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\ToDoListProgram.genruntim
 C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\ref\ToDoListProgram.dll
 C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\cr88q7yozc-9tipxoypyc.gz
 C:\Users\Admin\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\kd5co15dcr-9tipxoypyc.gz
-C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\cr88q7yozc-9tipxoypyc.gz
-C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\kd5co15dcr-9tipxoypyc.gz
 C:\Users\24544\Documents\GitHub\DotNET\ToDoListProgram\bin\Debug\net9.0\appsettings.Development.json
 C:\Users\24544\Documents\GitHub\DotNET\ToDoListProgram\bin\Debug\net9.0\appsettings.json
 C:\Users\24544\Documents\GitHub\DotNET\ToDoListProgram\bin\Debug\net9.0\ToDoListProgram.staticwebassets.runtime.json
@@ -398,3 +396,5 @@ C:\Users\24544\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\refint\T
 C:\Users\24544\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\ToDoListProgram.pdb
 C:\Users\24544\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\ToDoListProgram.genruntimeconfig.cache
 C:\Users\24544\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\ref\ToDoListProgram.dll
+C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\cr88q7yozc-jigu4cbet2.gz
+C:\Users\or45r\Documents\GitHub\DotNET\ToDoListProgram\obj\Debug\net9.0\compressed\kd5co15dcr-jigu4cbet2.gz
