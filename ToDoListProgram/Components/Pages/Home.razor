@@ -90,7 +90,7 @@
 
                             <!-- Category and Priority badges -->
                             <span class="badge bg-secondary ms-2">@((t.Category ?? "Uncategorized"))</span>
-                            <span class="badge ms-1 @(GetPriorityClass(t.Priority))">@((t.Priority ?? "None"))</span>
+                            <span class="badge ms-1 @PriorityFactory.From(t.Priority).BadgeClass">@PriorityFactory.From(t.Priority).Code</span>
                             @if (IsOverdue(t))
                             {
                                 <span class="badge bg-danger ms-1">Overdue</span>
@@ -122,7 +122,7 @@
 
                             <!-- Category and Priority badges -->
                             <span class="badge bg-info text-dark ms-3">@((t.Category ?? "Uncategorized"))</span>
-                            <span class="badge ms-1 @(GetPriorityClass(t.Priority))">@((t.Priority ?? "None"))</span>
+                            <span class="badge ms-1 @PriorityFactory.From(t.Priority).BadgeClass">@PriorityFactory.From(t.Priority).Code</span>
                         </div>
                         <span class="text-nowrap ms-3">@t.DueDate?.ToString("g")</span>
                     </li>
@@ -160,15 +160,6 @@
     // Auto-detect overdue tasks
     private bool IsOverdue(TodoItem t) =>
         !t.IsCompleted && t.DueDate.HasValue && t.DueDate.Value < DateTime.Now;
-
-    // For coloured priority badges
-    private string GetPriorityClass(string? p) => p?.ToUpper() switch
-    {
-        "H" or "HIGH"   => "bg-danger",
-        "M" or "MEDIUM" => "bg-warning text-dark",
-        "L" or "LOW"    => "bg-success",
-        _               => "bg-secondary"
-    };
 
     // Removes the event handlers attached in OnInitialized
     public void Dispose()
