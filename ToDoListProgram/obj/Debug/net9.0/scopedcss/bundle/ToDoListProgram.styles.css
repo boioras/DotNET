@@ -19,7 +19,7 @@ main[b-ec1mmy1flq] {
 }
 
 .top-row[b-ec1mmy1flq] {
-    background-color: #ffffff;
+    background-color: #121212;
     border-bottom: 1px solid #333;
     justify-content: flex-end;
     height: 3.5rem;
@@ -32,7 +32,7 @@ main[b-ec1mmy1flq] {
     white-space: nowrap;
     margin-left: 1.5rem;
     text-decoration: none;
-    color: #b0b0b0;                             /* softer link colour */
+    color: #b0b0b0;
     font-weight: 500;
     transition: color .2s ease;
 }
