@@ -25,12 +25,12 @@
             .Where(t => string.IsNullOrWhiteSpace(SelectedPriority)
                         || (t.Priority ?? "None") == SelectedPriority)
             .ToList();
-
+        // Uncompleted tasks, show the most urgent (closest due-date) first
         var open = filtered
             .Where(t => !t.IsCompleted)
             .OrderBy(t => t.DueDate ?? DateTime.MaxValue)
             .ToList();
-
+        // Completed tasks, show the most recently finished first
         var done = filtered
             .Where(t => t.IsCompleted)
             .OrderByDescending(t => t.DueDate ?? DateTime.MaxValue)
