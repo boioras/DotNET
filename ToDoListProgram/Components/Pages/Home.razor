@@ -89,7 +89,7 @@
                             <label class="form-check-label ms-2">@t.Title</label>
 
                             <!-- Category and Priority badges -->
-                            <span class="badge custom-cat ms-2">@((t.Category ?? "Uncategorized"))</span>
+                            <span class="badge bg-secondary ms-2">@((t.Category ?? "Uncategorized"))</span>
                             <span class="badge ms-1 @(GetPriorityClass(t.Priority))">@((t.Priority ?? "None"))</span>
                         </div>
                         <span class="text-nowrap ms-3">@t.DueDate?.ToString("g")</span>
