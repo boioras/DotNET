@@ -7,7 +7,7 @@
 <PageTitle>Home</PageTitle>
 
 <div class="container">
-    @if (UserService.IsLoggedIn())
+    @if (UserService.IsLoggedIn()) // only shows when logged in
     {
         var user = UserService.GetCurrentUser()!;
         var all = TodoService.GetForUser(user.Id).ToList();
@@ -16,7 +16,7 @@
         var categories = all.Select(t => t.Category ?? "Uncategorized").Distinct().OrderBy(c => c).ToList();
         var priorities = all.Select(t => t.Priority ?? "None").Distinct().OrderBy(p => p).ToList();
 
-        // Apply filters
+        // Apply filters, Lambda expressions
         var filtered = all
             .Where(t => string.IsNullOrWhiteSpace(SearchTerm)
                         || t.Title.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
@@ -44,7 +44,7 @@
                 <input class="form-control"
                        placeholder="Search tasks..."
                        @bind="SearchTerm"
-                       @bind:event="oninput" />
+                       @bind:event="oninput" /> <!-- instant filter -->
             </div>
             <div class="col-md-3">
                 <select class="form-select" @bind="SelectedCategory">
@@ -138,8 +138,8 @@
 </div>
 
 @code {
-    private Func<Task>? onChangeHandler;
-    private string SearchTerm = string.Empty;
+    private Func<Task>? onChangeHandler; // callback for service 
+    private string SearchTerm = string.Empty; // live search box
     private string? SelectedCategory;
     private string? SelectedPriority;
 
@@ -161,17 +161,16 @@
     private bool IsOverdue(TodoItem t) =>
         !t.IsCompleted && t.DueDate.HasValue && t.DueDate.Value < DateTime.Now;
 
-    private string GetPriorityClass(string? priority)
+    // For coloured priority badges
+    private string GetPriorityClass(string? p) => p?.ToUpper() switch
     {
-        return priority?.ToLower() switch
-        {
-            "high" => "bg-danger",
-            "medium" => "bg-warning text-dark",
-            "low" => "bg-success",
-            _ => "bg-secondary"
-        };
-    }
+        "H" or "HIGH"   => "bg-danger",
+        "M" or "MEDIUM" => "bg-warning text-dark",
+        "L" or "LOW"    => "bg-success",
+        _               => "bg-secondary"
+    };
 
+    // Removes the event handlers attached in OnInitialized
     public void Dispose()
     {
         if (onChangeHandler != null)
