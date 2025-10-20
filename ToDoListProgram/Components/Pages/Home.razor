@@ -44,7 +44,7 @@
                 <input class="form-control"
                        placeholder="Search tasks..."
                        @bind="SearchTerm"
-                       @bind:event="oninput" /> <!-- instant filter -->
+                       @bind:event="oninput" /> <!-- Instant filter -->
             </div>
             <div class="col-md-3">
                 <select class="form-select" @bind="SelectedCategory">
@@ -53,7 +53,7 @@
                     {
                         <option value="@cat">@cat</option>
                     }
-                </select>
+                </select> <!-- Category picker -->
             </div>
             <div class="col-md-3">
                 <select class="form-select" @bind="SelectedPriority">
@@ -62,7 +62,7 @@
                     {
                         <option value="@pri">@pri</option>
                     }
-                </select>
+                </select> <!-- Priority picker -->
             </div>
         </div>
 
@@ -138,8 +138,8 @@
 </div>
 
 @code {
-    private Func<Task>? onChangeHandler; // callback for service 
-    private string SearchTerm = string.Empty; // live search box
+    private Func<Task>? onChangeHandler; // Callback for service 
+    private string SearchTerm = string.Empty; // Live search box
     private string? SelectedCategory;
     private string? SelectedPriority;
 
@@ -152,9 +152,9 @@
 
     private async Task Toggle(TodoItem item)
     {
-        item.IsCompleted = !item.IsCompleted; // flags
-        TodoService.Update(item); // save to disk
-        await Task.CompletedTask; // keeps signature async
+        item.IsCompleted = !item.IsCompleted; // Flags
+        TodoService.Update(item); // Save to disk
+        await Task.CompletedTask; // Keeps signature async
     }
 
     // Auto-detect overdue tasks
