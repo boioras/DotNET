@@ -2,23 +2,18 @@
 
 namespace ToDoListProgram.Data;
 
-/// <summary>
-/// 与 users.json 一一对应的“存储模型”（只承载 JSON 字段）。
-/// —— 保证不改变磁盘上的数据结构 ——
-/// </summary>
 public class UserDto
 {
     public int Id { get; set; }
     public string Username { get; set; } = "";
     public string Password { get; set; } = "";
-    /// <summary>原有： "User" / "Admin" / "Guest"（如有）</summary>
+    ///  "User" / "Admin" 
     public string Role { get; set; } = "User";
 }
 
-/// <summary>
-/// 运行期“领域模型”的抽象基类（多态的入口）。
-/// 页面和服务层以后尽量面向 <see cref="User"/> 编程，而不是 if/else 判断 Role 字符串。
-/// </summary>
+// Entry point for polymorphic design
+// instead of using if/else statements to check the Role string.
+//Pages and services work directly with <see cref="User"/> objects,
 public abstract class User
 {
     public int Id { get; set; }
@@ -37,10 +32,10 @@ public abstract class User
         Role = dto.Role;
     }
 
-    /// <summary>是否为管理员（多态点）</summary>
+    // check if user is an admin (polymorphic override)
     public virtual bool IsAdmin => false;
 
-    /// <summary>UI 可直接绑定的“动作菜单”（多态点）</summary>
+    ///action menu bound to this user (polymorphic property).
     public virtual IEnumerable<MenuAction> GetMenuActions() => new[]
     {
         new MenuAction("viewTasks", "My Tasks", "checklist")
@@ -51,7 +46,7 @@ public abstract class User
     public override string ToString() => $"{Id} | {Role} | {Username}";
 }
 
-/// <summary>管理员</summary>
+//admin
 public sealed class AdminUser : User
 {
     public AdminUser() { Role = "Admin"; }  
@@ -68,7 +63,7 @@ public sealed class AdminUser : User
     };
 }
 
-/// <summary>普通用户</summary>
+//user
 public sealed class NormalUser : User
 {
     public NormalUser() { Role = "User"; }  
@@ -81,10 +76,8 @@ public sealed class NormalUser : User
     };
 }
 
-/// <summary>
-/// 工厂：把 Role -> 具体子类（多态创建点）。
-/// 保持与 JSON 的兼容：从 <see cref="UserDto"/> 转换为运行期的 <see cref="User"/>。
-/// </summary>
+//maps a Role value to a specific subclass (polymorphic instantiation).
+//converts a <see cref="UserDto"/> to a runtime <see cref="User"/>
 public static class UserFactory
 {
     public static User FromDto(UserDto dto)
@@ -101,5 +94,4 @@ public static class UserFactory
     };
 }
 
-/// <summary>页面可绑定的小型动作模型</summary>
 public readonly record struct MenuAction(string Key, string Label, string? Icon = null);
