@@ -12,10 +12,19 @@
         var user = UserService.GetCurrentUser()!;
         var all = TodoService.GetForUser(user.Id).ToList();
 
-        // Filter tasks based on search input
-        var filtered = string.IsNullOrWhiteSpace(SearchTerm)
-            ? all
-            : all.Where(t => t.Title.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+        // Collect distinct values for dropdowns
+        var categories = all.Select(t => t.Category ?? "Uncategorized").Distinct().OrderBy(c => c).ToList();
+        var priorities = all.Select(t => t.Priority ?? "None").Distinct().OrderBy(p => p).ToList();
+
+        // Apply filters
+        var filtered = all
+            .Where(t => string.IsNullOrWhiteSpace(SearchTerm)
+                        || t.Title.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase))
+            .Where(t => string.IsNullOrWhiteSpace(SelectedCategory)
+                        || (t.Category ?? "Uncategorized") == SelectedCategory)
+            .Where(t => string.IsNullOrWhiteSpace(SelectedPriority)
+                        || (t.Priority ?? "None") == SelectedPriority)
+            .ToList();
 
         var open = filtered
             .Where(t => !t.IsCompleted)
@@ -29,15 +38,35 @@
 
         <h2 class="mb-3">Hello, @user.Username!</h2>
 
-        <!--- Search bar --->
-        <div class="mb-3">
-            <input class="form-control"
-                   placeholder="Search tasks..."
-                   @bind="SearchTerm"
-                   @bind:event="oninput" />
+        // Search + Filters
+        <div class="row g-2 align-items-center mb-3">
+            <div class="col-md-6">
+                <input class="form-control"
+                       placeholder="Search tasks..."
+                       @bind="SearchTerm"
+                       @bind:event="oninput" />
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" @bind="SelectedCategory">
+                    <option value="">All Categories</option>
+                    @foreach (var cat in categories)
+                    {
+                        <option value="@cat">@cat</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" @bind="SelectedPriority">
+                    <option value="">All Priorities</option>
+                    @foreach (var pri in priorities)
+                    {
+                        <option value="@pri">@pri</option>
+                    }
+                </select>
+            </div>
         </div>
 
-        @* --- Open Tasks --- *@
+        // Open Tasks
         @if (!open.Any())
         {
             <p class="text-muted">Nothing due right now – enjoy your day!</p>
@@ -52,12 +81,16 @@
                 </li>
                 @foreach (var t in open)
                 {
-                    <li class="list-group-item d-flex justify-content-between align-items-center" @key="t.Id">
-                        <div class="form-check">
+                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" @key="t.Id">
+                        <div class="form-check d-flex align-items-center flex-wrap">
                             <input class="form-check-input" type="checkbox"
                                    checked="@t.IsCompleted"
                                    @onchange="async _ => await Toggle(t)" />
                             <label class="form-check-label ms-2">@t.Title</label>
+
+                            <!-- Category and Priority badges -->
+                            <span class="badge custom-cat ms-2">@((t.Category ?? "Uncategorized"))</span>
+                            <span class="badge ms-1 @(GetPriorityClass(t.Priority))">@((t.Priority ?? "None"))</span>
                         </div>
                         <span class="text-nowrap ms-3">@t.DueDate?.ToString("g")</span>
                     </li>
@@ -65,7 +98,7 @@
             </ul>
         }
 
-        @* --- Completed Tasks --- *@
+        // Completed Tasks
         @if (done.Any())
         {
             <ul class="list-group mt-3">
@@ -76,12 +109,16 @@
                 </li>
                 @foreach (var t in done)
                 {
-                    <li class="list-group-item d-flex justify-content-between align-items-center" @key="t.Id">
-                        <div class="form-check">
+                    <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap" @key="t.Id">
+                        <div class="form-check d-flex align-items-center flex-wrap">
                             <input class="form-check-input" type="checkbox"
                                    checked="@t.IsCompleted"
                                    @onchange="async _ => await Toggle(t)" />
                             <label class="form-check-label ms-2 text-decoration-line-through text-muted">@t.Title</label>
+
+                            <!-- Category and Priority badges -->
+                            <span class="badge bg-info text-dark ms-3">@((t.Category ?? "Uncategorized"))</span>
+                            <span class="badge ms-1 @(GetPriorityClass(t.Priority))">@((t.Priority ?? "None"))</span>
                         </div>
                         <span class="text-nowrap ms-3">@t.DueDate?.ToString("g")</span>
                     </li>
@@ -99,6 +136,8 @@
 @code {
     private Func<Task>? onChangeHandler;
     private string SearchTerm = string.Empty;
+    private string? SelectedCategory;
+    private string? SelectedPriority;
 
     protected override void OnInitialized()
     {
@@ -112,6 +151,17 @@
         item.IsCompleted = !item.IsCompleted; // flags
         TodoService.Update(item); // save to disk
         await Task.CompletedTask; // keeps signature async
+    }
+
+    private string GetPriorityClass(string? priority)
+    {
+        return priority?.ToLower() switch
+        {
+            "high" => "bg-danger",
+            "medium" => "bg-warning text-dark",
+            "low" => "bg-success",
+            _ => "bg-secondary"
+        };
     }
 
     public void Dispose()

@@ -12,7 +12,7 @@
     "Id": 2,
     "UserId": 2,
     "Title": "Dinner time",
-    "IsCompleted": true,
+    "IsCompleted": false,
     "Category": "Eatin",
     "Priority": "L",
     "DueDate": "2025-10-19T01:50:02"
