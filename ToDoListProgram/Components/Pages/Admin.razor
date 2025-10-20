@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @using ToDoListProgram.Data
 @inject ToDoListProgram.Service.UserService UserService
+@inject TodoService TodoService
 @inject NavigationManager Nav
 
 <h3>Add New User</h3>
@@ -222,13 +223,17 @@
     {
         if (deleteConfirmId is int id)
         {
-            // not allow to delete the last admin
             if (LastAdminId == id) { deleteConfirmId = null; return; }
 
+            // 1. Remove all tasks that belong to this user
+            foreach (var t in TodoService.GetForUser(id).ToList())
+                TodoService.Delete(t.Id);
+
+            // 2. Remove the user
             if (UserService.DeleteUser(id))
             {
                 deleteConfirmId = null;
-                Reload();
+                Reload(); // fresh user list
             }
         }
     }
