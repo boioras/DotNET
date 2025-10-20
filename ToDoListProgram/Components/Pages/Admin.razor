@@ -86,9 +86,6 @@
         {
           var isSelf = UserService.GetCurrentUser()?.Id == u.Id;
 
-          <button class="btn btn-sm btn-info me-2" @onclick="() => ManageTasks(u.Id)">Manage Tasks</button>
-
-
           <button class="btn btn-sm btn-warning me-2" @onclick="() => StartEdit(u)">Edit</button>
           <button class="btn btn-sm btn-outline-secondary me-2" @onclick="() => StartReset(u.Id)">Reset</button>
           <button class="btn btn-sm btn-danger"
@@ -126,7 +123,7 @@
     // edit/delete
     private int? editingId = null;
     private int? deleteConfirmId = null;
-    private User editModel = new();
+    private User editModel = new NormalUser();
 
     // reset password
     private int? resettingId = null;
@@ -134,32 +131,22 @@
     private string newPwd2 = "";
     private string resetMsg = "";
 
-    // navigate to view tasks
-    private void ManageTasks(int id)
+    // if there is only one admin, retern id
+   private int? LastAdminId
+{
+    get
     {
-        Nav.NavigateTo($"/tasks/{id}");
+        var adminIds = users.Where(u => u.IsAdmin).Select(u => u.Id).ToList();
+        return adminIds.Count == 1 ? adminIds[0] : (int?)null;
     }
-
-    // if there is only one admin, return id
-    private int? LastAdminId {
-        get {
-            var admins = users.Where(u => string.Equals(u.Role, "Admin", StringComparison.OrdinalIgnoreCase)).ToList();
-            return admins.Count == 1 ? admins[0].Id : (int?)null;
-        }
-    }
-
-    // on init, check admin and load users
-    protected override void OnInitialized() 
+}
+    protected override void OnInitialized()
     {
-        if (!UserService.IsAdmin()) // only admin can access
-        { 
-            Nav.NavigateTo("/"); 
-            return; 
-        }
-        Reload(); // reload all users
+        if (!UserService.IsAdmin()) { Nav.NavigateTo("/"); return; }
+        Reload();
     }
 
-    private void Reload() => users = UserService.GetAllUsers(); // reload user list
+    private void Reload() => users = UserService.GetAllUsers();
 
     //add new customer
     private void AddUser()
@@ -186,19 +173,39 @@
 
     // edit
     private void StartEdit(User u)
-    {
-        editingId = u.Id;
-        editModel = new User { Id = u.Id, Username = u.Username, Password = u.Password, Role = u.Role };
-    }
+{
+    editingId = u.Id;
 
-    // cancel edit
+    // Keep elements IsAdmin consistent on the UI
+    if (u is AdminUser)
+    {
+        editModel = new AdminUser
+        {
+            Id = u.Id,
+            Username = u.Username,
+            Password = u.Password,
+            Role = u.Role,
+            Tasks = new List<TodoItem>(u.Tasks) 
+        };
+    }
+    else
+    {
+        editModel = new NormalUser
+        {
+            Id = u.Id,
+            Username = u.Username,
+            Password = u.Password,
+            Role = u.Role,
+            Tasks = new List<TodoItem>(u.Tasks)
+        };
+    }
+}
+
     private void Cancel()
-    {
-        editingId = null;
-        editModel = new User();
-    }
-
-    // save edit
+{
+    editingId = null;
+    editModel = new NormalUser(); // returen a new one
+}
     private void Save(int id)
     {
         if (editModel.Id != id) return;
@@ -214,10 +221,9 @@
         }
     }
 
-    // delete confirm
+    // delete
     private void ConfirmDelete(int id) => deleteConfirmId = id;
 
-    // do delete
     private void DoDelete()
     {
         if (deleteConfirmId is int id)
@@ -242,7 +248,6 @@
         resetMsg = "";
     }
 
-    // cancel reset
     private void CancelReset()
     {
         resettingId = null;
@@ -251,22 +256,21 @@
         resetMsg = "";
     }
 
-    // do reset
     private void DoReset(int id)
     {
         resetMsg = "";
-        if (string.IsNullOrWhiteSpace(newPwd) || newPwd.Length < 3) // minimum length check
+        if (string.IsNullOrWhiteSpace(newPwd) || newPwd.Length < 3)
         {
             resetMsg = "Password must be at least 3 characters.";
             return;
         }
-        if (!string.Equals(newPwd, newPwd2, StringComparison.Ordinal)) // match check
+        if (!string.Equals(newPwd, newPwd2, StringComparison.Ordinal))
         {
             resetMsg = "Two passwords do not match.";
             return;
         }
 
-        if (UserService.ResetPassword(id, newPwd)) // reset password
+        if (UserService.ResetPassword(id, newPwd))
         {
             CancelReset();
             Reload();
