@@ -127,7 +127,7 @@
     // edit/delete
     private int? editingId = null;
     private int? deleteConfirmId = null;
-    private User editModel = new();
+    private User editModel = new NormalUser();
 
     // reset password
     private int? resettingId = null;
@@ -187,16 +187,38 @@
 
     // edit
     private void StartEdit(User u)
+{
+    editingId = u.Id;
+
+    if (u is AdminUser)
     {
-        editingId = u.Id;
-        editModel = new User { Id = u.Id, Username = u.Username, Password = u.Password, Role = u.Role };
+        editModel = new AdminUser
+        {
+            Id = u.Id,
+            Username = u.Username,
+            Password = u.Password,
+            Role = "Admin",
+            Tasks = new List<TodoItem>(u.Tasks)
+        };
     }
+    else
+    {
+        editModel = new NormalUser
+        {
+            Id = u.Id,
+            Username = u.Username,
+            Password = u.Password,
+            Role = "User",
+            Tasks = new List<TodoItem>(u.Tasks)
+        };
+    }
+}
 
     // cancel edit
     private void Cancel()
     {
         editingId = null;
-        editModel = new User();
+        editModel = new NormalUser();  
     }
 
     // save edit
