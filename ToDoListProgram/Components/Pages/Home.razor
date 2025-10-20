@@ -9,16 +9,33 @@
 <div class="container">
     @if (UserService.IsLoggedIn())
     {
-        var user   = UserService.GetCurrentUser()!;
-        var all    = TodoService.GetForUser(user.Id).ToList();
-        var open   = all.Where(t => !t.IsCompleted)
-                        .OrderBy(t => t.DueDate ?? DateTime.MaxValue)
-                        .ToList();
-        var done   = all.Where(t => t.IsCompleted)
-                        .OrderByDescending(t => t.DueDate ?? DateTime.MaxValue)
-                        .ToList();
+        var user = UserService.GetCurrentUser()!;
+        var all = TodoService.GetForUser(user.Id).ToList();
+
+        // Filter tasks based on search input
+        var filtered = string.IsNullOrWhiteSpace(SearchTerm)
+            ? all
+            : all.Where(t => t.Title.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+
+        var open = filtered
+            .Where(t => !t.IsCompleted)
+            .OrderBy(t => t.DueDate ?? DateTime.MaxValue)
+            .ToList();
+
+        var done = filtered
+            .Where(t => t.IsCompleted)
+            .OrderByDescending(t => t.DueDate ?? DateTime.MaxValue)
+            .ToList();
 
         <h2 class="mb-3">Hello, @user.Username!</h2>
+
+        <!--- Search bar --->
+        <div class="mb-3">
+            <input class="form-control"
+                   placeholder="Search tasks..."
+                   @bind="SearchTerm"
+                   @bind:event="oninput" />
+        </div>
 
         @* --- Open Tasks --- *@
         @if (!open.Any())
@@ -29,7 +46,7 @@
         {
             <ul class="list-group mb-0">
                 <li class="list-group-item list-group-item-secondary fw-bold
-                                d-flex justify-content-between align-items-center">
+                            d-flex justify-content-between align-items-center">
                     <span>To-do Tasks</span>
                     <span>Due Date</span>
                 </li>
@@ -38,8 +55,8 @@
                     <li class="list-group-item d-flex justify-content-between align-items-center" @key="t.Id">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox"
-                                checked="@t.IsCompleted"
-                                @onchange="async _ => await Toggle(t)" />
+                                   checked="@t.IsCompleted"
+                                   @onchange="async _ => await Toggle(t)" />
                             <label class="form-check-label ms-2">@t.Title</label>
                         </div>
                         <span class="text-nowrap ms-3">@t.DueDate?.ToString("g")</span>
@@ -53,7 +70,7 @@
         {
             <ul class="list-group mt-3">
                 <li class="list-group-item list-group-item-secondary fw-bold
-                        d-flex justify-content-between align-items-center">
+                            d-flex justify-content-between align-items-center">
                     <span>Completed Tasks</span>
                     <span>Due Date</span>
                 </li>
@@ -62,8 +79,8 @@
                     <li class="list-group-item d-flex justify-content-between align-items-center" @key="t.Id">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox"
-                                checked="@t.IsCompleted"
-                                @onchange="async _ => await Toggle(t)" />
+                                   checked="@t.IsCompleted"
+                                   @onchange="async _ => await Toggle(t)" />
                             <label class="form-check-label ms-2 text-decoration-line-through text-muted">@t.Title</label>
                         </div>
                         <span class="text-nowrap ms-3">@t.DueDate?.ToString("g")</span>
@@ -79,8 +96,9 @@
     }
 </div>
 
-@code{
+@code {
     private Func<Task>? onChangeHandler;
+    private string SearchTerm = string.Empty;
 
     protected override void OnInitialized()
     {
